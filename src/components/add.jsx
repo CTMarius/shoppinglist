@@ -1,11 +1,8 @@
 import React from 'react';
 import './add.css';
 
-const Add = () => {
-  const ClickHandler = () => {
-    let newTitle = prompt("Please enter your new title");
-  };
-  return <div onClick={ClickHandler} className="add">
+const Add = (props) => {
+  return <div onClick={props.onClick} className="add">
     Add
   </div>;
 }
