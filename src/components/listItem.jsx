@@ -1,11 +1,8 @@
 import React from 'react';
-import 'list.css';
+import './listItem.css';
 
-const List = (props) => {
-  const classes = 'list ' + props.className;
-  return (
-    <div className={classes}>{props.children}</div>
-  );
+const ListItem = (props) => {
+  return <div className="listItem">props</div>;
 }
 
-export default List;
+export default ListItem;

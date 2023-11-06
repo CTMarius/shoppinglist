@@ -1,11 +1,13 @@
 import "./groceries.css";
 import List from "./list.jsx";
+import Add from "./add.jsx";
 
 const Groceries = (props) => {
   return (
-    <List className="groceries">
-
-    </List>
+    <div>
+      <Add />
+      <List className="groceries"></List>
+    </div>
   );
 }
 
