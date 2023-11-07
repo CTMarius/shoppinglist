@@ -1,0 +1,26 @@
+.remove {
+  position: relative;
+  background-color: red;
+  border: none;
+  color: white;
+  padding: 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+  cursor: pointer;
+  width: 24px;  /* Updated width */
+  height: 24px;  /* Updated height */
+  border-radius: 2px;
+}
+
+.remove::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  content: "x";
+  font-size: 24px;  /* Updated font-size */
+  line-height: 24px;  /* Adjusted line-height to vertically center the "x" */
+}
