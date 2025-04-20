@@ -103,6 +103,36 @@ npm run server
 npm run dev
 ```
 
+## Dependencies
+
+### Core Dependencies
+```json
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.0",
+    "cors": "^2.8.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
+```
+
+### Development Dependencies
+```json
+{
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^4.3.9"
+  }
+}
+```
+
+### Removed Unused Dependencies
+- body-parser (using express.json instead)
+- https (not using HTTPS server)
+- fs (not using file operations)
+
 ## Development
 
 ### Available Scripts
@@ -135,6 +165,22 @@ The frontend communicates with the backend through the `api.js` service:
 - Modern browsers with localStorage support
 - Cross-origin requests supported
 - Mobile-responsive design
+
+## Offline Support
+
+### Features
+- Visual indicator for online/offline status
+- Automatic fallback to localStorage when offline
+- Data persistence between sessions
+- Automatic reconnection handling
+- Pending changes queue for offline operations
+
+### Offline Mode
+The application continues to work when offline by:
+- Using localStorage as a fallback database
+- Showing a status indicator for connection state
+- Maintaining data consistency between sessions
+- Automatically syncing when connection is restored
 
 ## Contributing
 1. Fork repository

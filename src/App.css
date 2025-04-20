@@ -11,6 +11,7 @@ main {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  padding-top: 40px;
 }
 
 .input-section {
@@ -89,6 +90,27 @@ main {
 
 .remove-button:hover {
   background-color: #cc0000;
+}
+
+.connection-status {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px;
+  text-align: center;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.connection-status.online {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.connection-status.offline {
+  background-color: #ff9800;
+  color: white;
 }
 
 @media (max-width: 768px) {

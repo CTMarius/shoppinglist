@@ -6,22 +6,45 @@ export default function App() {
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch items on component mount
+  // Fetch items on component mount and handle online/offline status
   useEffect(() => {
     fetchItems();
+    
+    // Add online/offline event listeners
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Check initial online status
+    setIsOnline(navigator.onLine);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
+
+  const handleOnline = () => {
+    setIsOnline(true);
+    fetchItems(); // Re-fetch items when we're back online
+  };
+
+  const handleOffline = () => {
+    setIsOnline(false);
+  };
 
   const fetchItems = async () => {
     try {
       setLoading(true);
       const data = await api.getAllItems();
       setItems(data);
-      // Also update localStorage
       localStorage.setItem('shoppingList', JSON.stringify(data));
+      setError(null);
     } catch (err) {
       setError('Failed to fetch items');
+      setIsOnline(false);
       // Fall back to localStorage
       const savedItems = localStorage.getItem('shoppingList');
       if (savedItems) setItems(JSON.parse(savedItems));
@@ -67,6 +90,10 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <div className={`connection-status ${isOnline ? 'online' : 'offline'}`}>
+        {isOnline ? 'Connected to server' : 'Offline Mode - Using Local Storage'}
+      </div>
+      
       <div className="input-section">
         <h2>Add New Item</h2>
         <form className="input-form" onSubmit={handleSubmit}>

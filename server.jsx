@@ -2,10 +2,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import shoppingListRoutes from './api/routes/shoppingListRoutes.jsx';
-import Task from './api/models/journalModel'; //created model loading here
-import bodyParser from 'body-parser';
-import https from 'https';
-import fs from 'fs';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,11 +20,6 @@ app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
-
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-app.use(bodyParser.json());
 
 app.use('/api', shoppingListRoutes);
 
