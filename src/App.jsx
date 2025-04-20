@@ -1,46 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import Groceries from './components/groceries.jsx';
-import { fetchListData } from "./handlers/listData.jsx";
+import { api } from './services/api';
 
 export default function App() {
-  const [groceries, setGroceries] = useState([]);
+  const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState('');
-  const [items, setItems] = useState(() => {
-    // Initialize items from localStorage
-    const savedItems = localStorage.getItem('shoppingList');
-    return savedItems ? JSON.parse(savedItems) : [];
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch items on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await fetchListData();
-      setGroceries(data);
-    };
-
-    fetchData();
+    fetchItems();
   }, []);
 
-  // Save to localStorage whenever items change
-  useEffect(() => {
-    localStorage.setItem('shoppingList', JSON.stringify(items));
-  }, [items]);
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getAllItems();
+      setItems(data);
+      // Also update localStorage
+      localStorage.setItem('shoppingList', JSON.stringify(data));
+    } catch (err) {
+      setError('Failed to fetch items');
+      // Fall back to localStorage
+      const savedItems = localStorage.getItem('shoppingList');
+      if (savedItems) setItems(JSON.parse(savedItems));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newItem.trim()) return; // Prevent empty items
-    const newItemObject = { 
-      id: Date.now(), 
+    if (!newItem.trim()) return;
+
+    const itemData = {
       name: newItem,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-    setItems([...items, newItemObject]);
-    setNewItem('');
+
+    try {
+      const savedItem = await api.createItem(itemData);
+      setItems([...items, savedItem]);
+      // Update localStorage
+      localStorage.setItem('shoppingList', JSON.stringify([...items, savedItem]));
+      setNewItem('');
+    } catch (err) {
+      setError('Failed to add item');
+    }
   };
 
-  const handleRemove = (id) => {
-    setItems(items.filter(item => item.id !== id));
+  const handleRemove = async (id) => {
+    try {
+      await api.deleteItem(id);
+      const updatedItems = items.filter(item => item._id !== id);
+      setItems(updatedItems);
+      // Update localStorage
+      localStorage.setItem('shoppingList', JSON.stringify(updatedItems));
+    } catch (err) {
+      setError('Failed to delete item');
+    }
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="app-container">
@@ -64,11 +87,11 @@ export default function App() {
         <h2>Shopping List</h2>
         <div className="grocery-list">
           {items.map((item) => (
-            <div key={item.id} className="list-item">
+            <div key={item._id} className="list-item">
               <span>{item.name}</span>
               <button
                 className="remove-button"
-                onClick={() => handleRemove(item.id)}
+                onClick={() => handleRemove(item._id)}
               >
                 Remove
               </button>
