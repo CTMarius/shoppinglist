@@ -1,11 +1,14 @@
-var express = require('express'),
-  app = express(),
-  port = process.env.PORT || 3000,
-  mongoose = require('mongoose'),
-  Task = require('./api/models/journalModel'), //created model loading here
-  bodyParser = require('body-parser');
-https = require("https");
-fs = require("fs");
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import shoppingListRoutes from './api/routes/shoppingListRoutes.jsx';
+import Task from './api/models/journalModel'; //created model loading here
+import bodyParser from 'body-parser';
+import https from 'https';
+import fs from 'fs';
+
+const app = express();
+const port = process.env.PORT || 3000;
 
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
@@ -24,12 +27,11 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+app.use('/api', shoppingListRoutes);
 
 var routes = require('./api/routes/journalRoutes'); //importing route
 routes(app); //register the route
 
-
-app.
-  listen(port, 'localhost', () => {
-    console.log(`API Server is running on port ${port}`);
-  });
+app.listen(port, 'localhost', () => {
+  console.log(`API Server is running on port ${port}`);
+});

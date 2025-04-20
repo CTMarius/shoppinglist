@@ -1,38 +1,67 @@
-'use strict';
+import ShoppingList from '../models/shoppingListModel.jsx';
 
-
-let mongoose = require('mongoose'),
-  Entry = mongoose.model('Entry');
-
-exports.list_all_entry = function(req, res) {
-  Entry.find({}, function(err, entry) {
-    if (err)
-      res.send(err);
-    res.json(entry);
-  });
+export const getAllItems = async (req, res) => {
+  try {
+    const items = await ShoppingList.find().sort({ createdAt: -1 });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.list_by_id = function(req, res) {
-  Entry.findById(req.params.id, function(err, entry) {
-    if (err)
-      res.send(err);
-    res.json(entry);
+export const createItem = async (req, res) => {
+  const item = new ShoppingList({
+    name: req.body.name
   });
+
+  try {
+    const newItem = await item.save();
+    res.status(201).json(newItem);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
-exports.create_a_entry = function(req, res) {
-  let new_entry = new Entry(req.body);
-  new_entry.save(function(err, entry) {
-    if (err)
-      res.send(err);
-    res.json(entry);
-  });
+export const getItem = async (req, res) => {
+  try {
+    const item = await ShoppingList.findById(req.params.id);
+    if (item) {
+      res.json(item);
+    } else {
+      res.status(404).json({ message: 'Item not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.update_a_entry = function(req, res) {
-  Entry.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true }, function(err, task) {
-    if (err)
-      res.send(err);
-    res.json(task);
-  });
+export const updateItem = async (req, res) => {
+  try {
+    const item = await ShoppingList.findById(req.params.id);
+    if (item) {
+      item.name = req.body.name || item.name;
+      item.completed = req.body.completed ?? item.completed;
+      
+      const updatedItem = await item.save();
+      res.json(updatedItem);
+    } else {
+      res.status(404).json({ message: 'Item not found' });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const deleteItem = async (req, res) => {
+  try {
+    const item = await ShoppingList.findById(req.params.id);
+    if (item) {
+      await item.remove();
+      res.json({ message: 'Item deleted' });
+    } else {
+      res.status(404).json({ message: 'Item not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

@@ -1,13 +1,18 @@
-'use strict';
+import express from 'express';
+import {
+  getAllItems,
+  createItem,
+  getItem,
+  updateItem,
+  deleteItem
+} from '../controllers/shoppingListController.jsx';
 
-module.exports = function(app) {
-  let journal = require('../controllers/journalController');
+const router = express.Router();
 
-  app.route('/entry')
-    .get(journal.list_all_entry)
-    .post(journal.create_a_entry);
+router.get('/items', getAllItems);
+router.post('/items', createItem);
+router.get('/items/:id', getItem);
+router.put('/items/:id', updateItem);
+router.delete('/items/:id', deleteItem);
 
-  app.route('/entry/:id')
-    .get(journal.list_by_id)
-    .put(journal.update_a_entry);
-};
+export default router;
