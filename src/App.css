@@ -11,7 +11,7 @@ main {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  padding-top: 40px;
+  padding-top: 16px;
 }
 
 .input-section {
@@ -95,22 +95,31 @@ main {
 .connection-status {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  padding: 8px;
-  text-align: center;
-  font-size: 14px;
+  right: 16px;
+  padding: 4px 12px;
+  margin: 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  opacity: 0.8;
   transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .connection-status.online {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
 }
 
 .connection-status.offline {
-  background-color: #ff9800;
-  color: white;
+  background-color: #fff3e0;
+  color: #ef6c00;
+  border: 1px solid #ffcc80;
+}
+
+.connection-status:hover {
+  opacity: 1;
 }
 
 .empty-list {
@@ -126,8 +135,9 @@ main {
 }
 
 .error-message {
-  font-size: 12px;
-  margin-top: 4px;
+  font-size: 11px;
+  margin-top: 2px;
+  opacity: 0.9;
 }
 
 @media (max-width: 768px) {
