@@ -6,7 +6,11 @@ import { fetchListData } from "./handlers/listData.jsx";
 export default function App() {
   const [groceries, setGroceries] = useState([]);
   const [newItem, setNewItem] = useState('');
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(() => {
+    // Initialize items from localStorage
+    const savedItems = localStorage.getItem('shoppingList');
+    return savedItems ? JSON.parse(savedItems) : [];
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,9 +21,19 @@ export default function App() {
     fetchData();
   }, []);
 
+  // Save to localStorage whenever items change
+  useEffect(() => {
+    localStorage.setItem('shoppingList', JSON.stringify(items));
+  }, [items]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newItemObject = { id: Date.now(), name: newItem };
+    if (!newItem.trim()) return; // Prevent empty items
+    const newItemObject = { 
+      id: Date.now(), 
+      name: newItem,
+      createdAt: new Date().toISOString()
+    };
     setItems([...items, newItemObject]);
     setNewItem('');
   };
