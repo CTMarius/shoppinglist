@@ -113,6 +113,23 @@ main {
   color: white;
 }
 
+.empty-list {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.loading-indicator {
+  font-size: 14px;
+  color: #666;
+  margin-left: 10px;
+}
+
+.error-message {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
 @media (max-width: 768px) {
   .app-container {
     grid-template-columns: 1fr;

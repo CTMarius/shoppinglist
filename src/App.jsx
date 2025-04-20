@@ -3,97 +3,97 @@ import './App.css';
 import { api } from './services/api';
 
 export default function App() {
-  const [items, setItems] = useState([]);
+  // Initialize items from localStorage first
+  const [items, setItems] = useState(() => {
+    const savedItems = localStorage.getItem('shoppingList');
+    return savedItems ? JSON.parse(savedItems) : [];
+  });
   const [newItem, setNewItem] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [error, setError] = useState(null);
 
-  // Fetch items on component mount and handle online/offline status
+  // Sync with server when online
   useEffect(() => {
-    fetchItems();
-    
-    // Add online/offline event listeners
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    const syncWithServer = async () => {
+      if (navigator.onLine) {
+        try {
+          setLoading(true);
+          const data = await api.getAllItems();
+          setItems(data);
+          localStorage.setItem('shoppingList', JSON.stringify(data));
+          setError(null);
+          setIsOnline(true);
+        } catch (err) {
+          setError('Server sync failed - using local data');
+          setIsOnline(false);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
 
-    // Check initial online status
-    setIsOnline(navigator.onLine);
+    window.addEventListener('online', syncWithServer);
+    window.addEventListener('offline', () => setIsOnline(false));
+
+    // Initial sync attempt
+    syncWithServer();
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', syncWithServer);
+      window.removeEventListener('offline', () => setIsOnline(false));
     };
   }, []);
-
-  const handleOnline = () => {
-    setIsOnline(true);
-    fetchItems(); // Re-fetch items when we're back online
-  };
-
-  const handleOffline = () => {
-    setIsOnline(false);
-  };
-
-  const fetchItems = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getAllItems();
-      setItems(data);
-      localStorage.setItem('shoppingList', JSON.stringify(data));
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch items');
-      setIsOnline(false);
-      // Fall back to localStorage
-      const savedItems = localStorage.getItem('shoppingList');
-      if (savedItems) setItems(JSON.parse(savedItems));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newItem.trim()) return;
 
-    const itemData = {
+    const newItemData = {
+      id: Date.now(),
       name: newItem,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
 
-    try {
-      const savedItem = await api.createItem(itemData);
-      setItems([...items, savedItem]);
-      // Update localStorage
-      localStorage.setItem('shoppingList', JSON.stringify([...items, savedItem]));
-      setNewItem('');
-    } catch (err) {
-      setError('Failed to add item');
+    // Update local state and storage immediately
+    const updatedItems = [...items, newItemData];
+    setItems(updatedItems);
+    localStorage.setItem('shoppingList', JSON.stringify(updatedItems));
+    setNewItem('');
+
+    // Try to sync with server if online
+    if (navigator.onLine) {
+      try {
+        await api.createItem(newItemData);
+      } catch (err) {
+        setError('Failed to sync with server - changes saved locally');
+      }
     }
   };
 
   const handleRemove = async (id) => {
-    try {
-      await api.deleteItem(id);
-      const updatedItems = items.filter(item => item._id !== id);
-      setItems(updatedItems);
-      // Update localStorage
-      localStorage.setItem('shoppingList', JSON.stringify(updatedItems));
-    } catch (err) {
-      setError('Failed to delete item');
+    // Update local state and storage immediately
+    const updatedItems = items.filter(item => item.id !== id);
+    setItems(updatedItems);
+    localStorage.setItem('shoppingList', JSON.stringify(updatedItems));
+
+    // Try to sync with server if online
+    if (navigator.onLine) {
+      try {
+        await api.deleteItem(id);
+      } catch (err) {
+        setError('Failed to sync deletion with server');
+      }
     }
   };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="app-container">
       <div className={`connection-status ${isOnline ? 'online' : 'offline'}`}>
         {isOnline ? 'Connected to server' : 'Offline Mode - Using Local Storage'}
+        {error && <div className="error-message">{error}</div>}
       </div>
-      
+
       <div className="input-section">
         <h2>Add New Item</h2>
         <form className="input-form" onSubmit={handleSubmit}>
@@ -111,19 +111,23 @@ export default function App() {
       </div>
       
       <div className="list-section">
-        <h2>Shopping List</h2>
+        <h2>Shopping List {loading && <span className="loading-indicator">Syncing...</span>}</h2>
         <div className="grocery-list">
-          {items.map((item) => (
-            <div key={item._id} className="list-item">
-              <span>{item.name}</span>
-              <button
-                className="remove-button"
-                onClick={() => handleRemove(item._id)}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+          {items.length === 0 ? (
+            <div className="empty-list">No items in your list</div>
+          ) : (
+            items.map((item) => (
+              <div key={item.id} className="list-item">
+                <span>{item.name}</span>
+                <button
+                  className="remove-button"
+                  onClick={() => handleRemove(item.id)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
